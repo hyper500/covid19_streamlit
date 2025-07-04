@@ -2,7 +2,6 @@ import plotly.express as px
 import streamlit as st
 import pandas as pd
 import numpy as np
-from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 
@@ -65,27 +64,16 @@ if uploaded_confirmed and uploaded_deaths and uploaded_recoverd:
 
     with tab1:
         st.subheader("📈 누적 추이 그래프")
-        selected = st.multiselect(
-            "표시할 항목을 선택하세요", 
-            ['확진자', '사망자', '회복자'], 
-            default=['확진자', '사망자'] # 제일 처음 시작하면 나올 그래프
-            )
-        
-        if selected:  # 선택된 값이 있다면
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-            
-            for item in selected:
-                fig.add_trace(
-                    go.Scatter(x=df_merged['날짜'], y=df_merged[item], name=item, mode='lines+markers'),
-                    secondary_y=True if item == '사망자' else False
-                )
-            
-            fig.update_layout(title_text="누적 추이 그래프 (이중 Y축)", legend_title_text="항목")
-            fig.update_xaxes(title_text="날짜")
-            fig.update_yaxes(title_text="확진자 / 회복자 수", secondary_y=False)
-            fig.update_yaxes(title_text="사망자 수", secondary_y=True)
-            
+        selected = st.multiselect("표시할 항목을 선택하세요", ['확진자', '사망자', '회복자'], default=['확진자', '회복자'])
+        if selected:
+            fig = px.line(df_merged, x="날짜", y=selected, markers=True)
             st.plotly_chart(fig, use_container_width=True)
+
+        st.subheader("🆕 일일 증가량 그래프")
+        selected_new = st.multiselect("표시할 항목 (신규)", ['신규 확진자', '신규 사망자', '신규 회복자'], default=['신규 확진자'])
+        if selected_new:
+            fig_new = px.bar(df_merged, x="날짜", y=selected_new)
+            st.plotly_chart(fig_new, use_container_width=True)
 
     st.subheader("🆕 일일 증가량 그래프")
     selected_new = st.multiselect("표시할 항목 (신규)", ['신규 확진자', '신규 사망자', '신규 회복자'], default=['신규 확진자'])
